@@ -69,6 +69,7 @@ class _DesktopControlsState extends ConsumerState<DesktopControls> {
   Offset? _doubleTapPosition;
 
   final SeekIndicatorController _seekController = SeekIndicatorController();
+  bool _loadingNextVideo = false;
 
   late final double topPadding = MediaQuery.of(context).viewPadding.top;
   late final double bottomPadding = MediaQuery.of(context).viewPadding.bottom;
@@ -643,7 +644,6 @@ class _DesktopControlsState extends ConsumerState<DesktopControls> {
     final end = mediaSegment?.end;
     if (end != null) {
       resetTimer();
-      ref.read(videoPlayerProvider).seek(end);
 
       if (segmentId != null) {
         Future(() {
@@ -655,6 +655,18 @@ class _DesktopControlsState extends ConsumerState<DesktopControls> {
               );
         });
       }
+
+      if (mediaSegment?.type == MediaSegmentType.outro && !_loadingNextVideo) {
+        final nextVideo = ref.read(playBackModel.select((value) => value?.nextVideo));
+        final nextType = ref.read(videoPlayerSettingsProvider.select((value) => value.nextVideoType));
+        if (nextVideo != null && nextType != AutoNextType.off) {
+          _loadingNextVideo = true;
+          ref.read(playbackModelHelper).loadNewVideo(nextVideo);
+          return;
+        }
+      }
+
+      ref.read(videoPlayerProvider).seek(end);
     }
   }
 
