@@ -793,6 +793,7 @@ class _DesktopControlsState extends ConsumerState<DesktopControls> {
       }
       return KeyEventResult.handled;
     } else if (event is KeyUpEvent) {
+      toggleOverlay(value: true);
       if (_speedBoostActive) {
         _deactivateSpeedBoost();
       } else {
@@ -850,6 +851,10 @@ class _DesktopControlsState extends ConsumerState<DesktopControls> {
 
     final volume = ref.read(videoPlayerSettingsProvider.select((value) => value.volume));
 
+    if (value != VideoHotKeys.exit) {
+      toggleOverlay(value: true);
+    }
+
     switch (value) {
       case VideoHotKeys.playPause:
         if (_speedBoostActive) {
@@ -858,19 +863,15 @@ class _DesktopControlsState extends ConsumerState<DesktopControls> {
         ref.read(videoPlayerProvider).playOrPause();
         return true;
       case VideoHotKeys.volumeUp:
-        resetTimer();
         ref.read(videoPlayerSettingsProvider.notifier).steppedVolume(5);
         return true;
       case VideoHotKeys.volumeDown:
-        resetTimer();
         ref.read(videoPlayerSettingsProvider.notifier).steppedVolume(-5);
         return true;
       case VideoHotKeys.speedUp:
-        resetTimer();
         ref.read(videoPlayerSettingsProvider.notifier).steppedSpeed(0.1);
         return true;
       case VideoHotKeys.speedDown:
-        resetTimer();
         ref.read(videoPlayerSettingsProvider.notifier).steppedSpeed(-0.1);
         return true;
       case VideoHotKeys.fullScreen:
